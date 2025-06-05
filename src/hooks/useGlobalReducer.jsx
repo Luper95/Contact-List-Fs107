@@ -1,24 +1,74 @@
-// Import necessary hooks and functions from React.
-import { useContext, useReducer, createContext } from "react";
-import storeReducer, { initialStore } from "../store"  // Import the reducer and the initial state.
+import { createContext, useContext, useReducer } from "react";
 
-// Create a context to hold the global state of the application
-// We will call this global state the "store" to avoid confusion while using local states
-const StoreContext = createContext()
+const ConctactContext = createContext();
 
-// Define a provider component that encapsulates the store and warps it in a context provider to 
-// broadcast the information throught all the app pages and components.
-export function StoreProvider({ children }) {
-    // Initialize reducer with the initial state.
-    const [store, dispatch] = useReducer(storeReducer, initialStore())
-    // Provide the store and dispatch method to all child components.
-    return <StoreContext.Provider value={{ store, dispatch }}>
-        {children}
-    </StoreContext.Provider>
+const initialState = {
+  contacts: [],
+  isEditing: false,
+  contactToEdit: null,
+};
+
+function contactReducer(state, action) {
+  switch (action.type) {
+    case "ADD_CONTACT":
+      return {
+        ...state,
+        contacts: [...state.contacts, action.payload],
+      };
+
+    case "REMOVE_CONTACT":
+      return {
+        ...state,
+        contacts: state.contacts.filter(
+          (contact) => contact.id !== action.payload
+        ),
+      };
+
+    case "UPDATE_CONTACT":
+      return {
+        ...state,
+        contacts: state.contacts.map((contact) =>
+          contact.id === action.payload.id ? action.payload : contact
+        ),
+      };
+
+    case "SET_CONTACTS":
+      return {
+        ...state,
+        contacts: action.payload,
+      };
+
+    case "SET_EDIT_CONTACT":
+      return {
+        ...state,
+        isEditing: true,
+        contactToEdit: state.contacts.find(
+          (contact) => contact.id === action.payload
+        ),
+      };
+
+    case "CLEAR_EDIT_CONTACT":
+      return {
+        ...state,
+        isEditing: false,
+        contactToEdit: null,
+      };
+
+    default:
+      return state;
+  }
 }
 
-// Custom hook to access the global state and dispatch function.
+export function ContactProvider({ children }) {
+  const [contactsList, dispatch] = useReducer(contactReducer, initialState);
+
+  return (
+    <ConctactContext.Provider value={{ contactsList, dispatch }}>
+      {children}
+    </ConctactContext.Provider>
+  );
+}
+
 export default function useGlobalReducer() {
-    const { dispatch, store } = useContext(StoreContext)
-    return { dispatch, store };
+  return useContext(ConctactContext);
 }

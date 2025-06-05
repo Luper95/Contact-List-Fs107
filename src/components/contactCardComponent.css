@@ -1,0 +1,13 @@
+.trashCan:hover{
+    cursor:pointer;
+    color: red !important;
+    scale: 1.2;
+    transition: all 0.2s ease-in-out;
+}
+
+.pencilEdit:hover{
+    cursor:pointer;
+    color: #0a9e2f !important;
+    scale: 1.2;
+    transition: all 0.2s ease-in-out;
+}
