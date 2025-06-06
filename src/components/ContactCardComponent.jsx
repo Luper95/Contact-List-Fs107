@@ -2,16 +2,34 @@ import "./contactCardComponent.css";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { DeleteContact } from "../Services/Services";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ModalComponent from "./ModalComponent";
 
 export default function ContactCardComponent({ Contact }) {
   const { dispatch } = useGlobalReducer();
   const navigate = useNavigate();
 
+  //const para el modal
+  const [showModal, setShowModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState(null);
+
+  //eliminar el contacto,Llamando a un modal para confirmacion
   const handleClickDelete = () => {
-    DeleteContact(Contact.id).then(() => {
-      dispatch({ type: "REMOVE_CONTACT", payload: Contact.id });
-    });
+    setIdToDelete(Contact.id);
+    setShowModal(true);
   };
+  //ahora si eliminamos desde el modal
+  const confirmDelete = () => {
+    DeleteContact(Contact.id).then(
+      dispatch({ type: "REMOVE_CONTACT", payload: idToDelete })
+    );
+    setTimeout(() => {
+      setShowModal(false);
+      setIdToDelete(null);
+    }, 200);
+  };
+
+  //editar el contacto
   const handleClickEdit = () => {
     console.log("Edit contact with ID:", Contact.id);
     dispatch({ type: "SET_EDIT_CONTACT", payload: Contact.id });
@@ -54,6 +72,11 @@ export default function ContactCardComponent({ Contact }) {
           onClick={handleClickDelete}
         ></i>
       </div>
+      <ModalComponent
+        show={showModal}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowModal(false)}
+      />
     </div>
   );
 }
